@@ -49,7 +49,6 @@ WARNING_NOT_REGISTERED = """
 class VoiceAssistant:
     def __init__(self):
         print("Initialising")
-        self.actions = Actions()
     def process_event(self,event):
         """Pretty prints events.
 
@@ -59,10 +58,6 @@ class VoiceAssistant:
         Args:
             event(event.Event): The current event to process.
         """
-        commands ={
-                "turn":self.toggleDevice
-            }
-        
         if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
             print()
 
@@ -70,11 +65,8 @@ class VoiceAssistant:
         if (event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED and
                 event.args):
             c = event.args['text']
-            for key in commands.iteritems():
-                if str(key[0]) in c:
-                    a.stop_conversation()
-                    commands[key[0]](c)
-                    break
+            self.actions.checkCommand(c, "goog")
+            
         if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
                 event.args and not event.args['with_follow_on_turn']):
             print()
@@ -137,7 +129,9 @@ class VoiceAssistant:
 
         with Assistant(credentials, device_model_id) as assistant:
             self.assistant = assistant
+            self.actions = Actions(self.assistant)
             events = self.assistant.start()
+            
 
             device_id = assistant.device_id
             print('device_model_id:', device_model_id)
@@ -159,6 +153,7 @@ class VoiceAssistant:
                     print(WARNING_NOT_REGISTERED)
 
             self.m = Mode()
+                    
             #x = threading.Thread(target=m.start)
             #x.daemon = True
             #x.start()

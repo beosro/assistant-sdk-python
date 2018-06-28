@@ -3,6 +3,7 @@ from threading import Thread
 from rgbled.eyes import Eyes
 #from face.face import Face
 import os
+from siricontrol import *
 
 
 class Mode:
@@ -36,6 +37,11 @@ class Mode:
         ledEyes = Thread(target=self.eyes.start)
         ledEyes.daemon = True
         ledEyes.start()
+
+        self.siri = Control(self)
+        siricontrol = Thread(target=self.siri.handle)
+        siricontrol.daemon = True
+        siricontrol.start()
         
         #self.eyes = Eyes(self)
         #ledEyes = Thread(target=self.eyes.start)
@@ -43,7 +49,10 @@ class Mode:
         #ledEyes.start()
   
     def changeVoiceMode(self,event):
-        self.mode = event.type
+        try:
+            self.mode = event.type
+        except:
+            self.mode = event
         try:
             print(self.modes[str(self.mode)]())
         except:

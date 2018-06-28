@@ -19,16 +19,17 @@ class ControlException(Exception):
     pass
 
 
-class Control():
-    def __init__(self, username, password):
+class Control:
+    def __init__(self, main):
         print("------------------------------------------------------")
         print("-                    SIRI CONTROL                    -")
         print("-           Created by Sanjeet Chatterjee            -")
         print("-      Website: thereallycoolstuff.wordpress.com     -")
         print("------------------------------------------------------")
-        self.commands ={
-            "turn":toggleDevice
-        }
+        self.actions = Actions(self)
+        self.main = main
+        username = "voicecommands100@gmail.com"
+        password = "commands100"
         try:
             self.last_checked = -1
             self.mail = imaplib.IMAP4_SSL("imap.gmail.com", 993)
@@ -44,7 +45,6 @@ class Control():
                 pass
 
             self.load()
-            self.handle()
         except imaplib.IMAP4.error:
             print("Your username and password is incorrect")
             print("Or IMAP is not enabled.")
@@ -106,10 +106,11 @@ class Control():
                 if not command:
                     raise ControlException("No command found.")
                 else:
-                    for key in self.commands.iteritems():
-                        if str(key[0]) in command:
-                            self.commands[key[0]](command)
-                            break
+                    eventLoad = "EventType.ON_END_OF_UTTERANCE"
+                    eventEnd = "EventType.ON_CONVERSATION_TURN_FINISHED"
+                    self.main.changeVoiceMode(eventLoad)
+                    self.actions.checkCommand(command, "siri")
+                    self.main.changeVoiceMode(eventEnd)
                 print("The word(s) '" + command + "' have been said.")
             except (TypeError, ControlException):
                 pass
