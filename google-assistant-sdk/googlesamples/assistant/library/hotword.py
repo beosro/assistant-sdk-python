@@ -24,13 +24,14 @@ import argparse
 import json
 import os.path
 import pathlib2 as pathlib
-
+from datetime import datetime
 import google.oauth2.credentials
 
 from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 from google.assistant.library.file_helpers import existing_file
 from google.assistant.library.device_helpers import register_device
+from google.assistant.embedded.v1alpha2 import *
 
 try:
     FileNotFoundError
@@ -49,6 +50,22 @@ WARNING_NOT_REGISTERED = """
 class VoiceAssistant:
     def __init__(self):
         print("Initialising")
+
+    def speak(self,m):
+	 os.system("espeak -s 135 -v en -p 50 '" + str(m) + "'  --stdout | aplay -c1 -D plughw:1,0")
+
+    def welcome(self):
+	hour = datetime.now().hour
+
+        if(hour < 12):
+           self.mic.say("Good morning, how can I help?")
+
+        if(hour < 16 & hour > 12):
+           self.mic.say("Good afternoon, how can I help?")
+
+        if (hour >= 16):
+           self.speak("Good evening, how can I help?")
+
     def process_event(self,event):
         """Pretty prints events.
 
@@ -66,7 +83,14 @@ class VoiceAssistant:
                 event.args):
             c = event.args['text']
             self.actions.checkCommand(c, "goog")
-            
+
+	if (event.type == EventType.ON_RENDER_RESPONSE and event.args):
+	    resp = event.args['text']
+	    try:
+		self.speak(resp)
+	    except:
+		self.speak('Sorry, there was an error')
+	           
         if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
                 event.args and not event.args['with_follow_on_turn']):
             print()
@@ -78,10 +102,10 @@ class VoiceAssistant:
         parser = argparse.ArgumentParser(
             formatter_class=argparse.RawTextHelpFormatter)
         parser.add_argument('--device-model-id', '--device_model_id', type=str,
-                            metavar='DEVICE_MODEL_ID', required=False,
+                            metavar='DEVICE_MODEL_ID',default="abcdefghi", required=False,
                             help='the device model ID registered with Google')
         parser.add_argument('--project-id', '--project_id', type=str,
-                            metavar='PROJECT_ID', required=False,
+                            metavar='PROJECT_ID',default="finalassistant", required=False,
                             help='the project ID used to register this device')
         parser.add_argument('--device-config', type=str,
                             metavar='DEVICE_CONFIG_FILE',
@@ -126,7 +150,6 @@ class VoiceAssistant:
             args.device_model_id and args.device_model_id != device_model_id)
 
         device_model_id = args.device_model_id or device_model_id
-
         with Assistant(credentials, device_model_id) as assistant:
             self.assistant = assistant
             self.actions = Actions(self.assistant)
@@ -151,8 +174,7 @@ class VoiceAssistant:
                         }, f)
                 else:
                     print(WARNING_NOT_REGISTERED)
-
-            self.m = Mode()
+            self.m = Mode(self)
                     
             #x = threading.Thread(target=m.start)
             #x.daemon = True

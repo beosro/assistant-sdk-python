@@ -1,13 +1,12 @@
 import time
 from threading import Thread
 from rgbled.eyes import Eyes
-#from face.face import Face
+from face.face import Face
 import os
 from siricontrol import *
 
-
 class Mode:
-    def __init__(self):
+    def __init__(self, main):
         self.colourMode = 0
         self.speakingMode = 0
         self.sleepMode = 0
@@ -16,6 +15,7 @@ class Mode:
         self.wakeEyes = 0
         self.trackMode = "auto"
         self.mode = "start"
+	self.main = main
         self.modes = {   
             "EventType.ON_RESPONDING_STARTED": self.startSpeaking,
             "EventType.ON_RESPONDING_FINSIHED": self.stopSpeaking,
@@ -28,15 +28,17 @@ class Mode:
         #check.daemon = True
         #check.start()
 
-        #self.face = Face(self)
-        #self.faceTracking = Thread(target=self.face.start)
-        #self.faceTracking.daemon = True
-        #self.faceTracking.start()
+        self.face = Face(self)
+        self.faceTracking = Thread(target=self.face.startup)
+        self.faceTracking.daemon = True
+        self.faceTracking.start()
 
         self.eyes = Eyes(self)
         ledEyes = Thread(target=self.eyes.start)
         ledEyes.daemon = True
         ledEyes.start()
+	
+	self.main.welcome()
 
         self.siri = Control(self)
         siricontrol = Thread(target=self.siri.handle)

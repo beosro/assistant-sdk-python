@@ -4,11 +4,10 @@ import cv2
 import os
 import random
 import sys
-import _thread
+from threading import Thread
 
 class Face:
-        def __init__(self, main):
-                print("hi")
+        def __init__(self,main):
                 self.main = main
                 # Upper limit
                 self._Servo1UL = 250
@@ -346,10 +345,8 @@ class Face:
                                 if Cface[1] < 80:
                                         self.CamDown(9,3)
                                         
-        def servoTest(self):
+        def startup(self):
                 self.changePos("wake")
-                time.sleep(5)
-                self.changePos("sleep")
 
 class Main:
     def __init__(self):
@@ -361,4 +358,4 @@ class Main:
 if __name__=="__main__":
         m = Main()
         f = Face(m)
-        f.servoTest()
+        f.startup()
