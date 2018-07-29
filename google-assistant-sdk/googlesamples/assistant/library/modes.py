@@ -28,22 +28,22 @@ class Mode:
         #check.daemon = True
         #check.start()
 
-        self.face = Face(self)
-        self.faceTracking = Thread(target=self.face.startup)
-        self.faceTracking.daemon = True
-        self.faceTracking.start()
+        #self.face = Face(self)
+        #self.faceTracking = Thread(target=self.face.startup)
+        #self.faceTracking.daemon = True
+        #self.faceTracking.start()
 
         self.eyes = Eyes(self)
         ledEyes = Thread(target=self.eyes.start)
         ledEyes.daemon = True
         ledEyes.start()
 	
-	self.main.welcome()
+	#self.main.welcome()
 
-        self.siri = Control(self)
-        siricontrol = Thread(target=self.siri.handle)
-        siricontrol.daemon = True
-        siricontrol.start()
+        #self.siri = Control(self)
+        #siricontrol = Thread(target=self.siri.handle)
+        #siricontrol.daemon = True
+        #siricontrol.start()
         
         #self.eyes = Eyes(self)
         #ledEyes = Thread(target=self.eyes.start)

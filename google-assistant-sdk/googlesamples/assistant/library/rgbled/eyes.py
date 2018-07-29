@@ -20,7 +20,7 @@ class Eyes():
                 }
 
         def default(self):
-                rgb.changeto(0,255,255,0.005)
+                rgb.changeto(0,100,100,0.005)
 
         def speaking(self):
                 rgb.changeto(255,20,0,0.008)

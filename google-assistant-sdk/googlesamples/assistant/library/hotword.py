@@ -19,7 +19,8 @@ from __future__ import print_function
 import os
 from modes import Mode
 from actions import *
-
+import sys
+import time
 import argparse
 import json
 import os.path
@@ -50,18 +51,21 @@ WARNING_NOT_REGISTERED = """
 class VoiceAssistant:
     def __init__(self):
         print("Initialising")
+	if len(sys.argv) > 1:
+		os.system("sudo /home/pi/PiBits/ServoBlaster/user/./servod")
+		os.system("sudo pigpiod")
 
     def speak(self,m):
-	 os.system("espeak -s 135 -v en -p 50 '" + str(m) + "'  --stdout | aplay -c1 -D plughw:1,0")
-
+	os.system("espeak -s 135 -v en -p 50 '" + str(m) + "'  --stdout | aplay -c1 -D plughw:1,0")
+	#os.system("espeak -s 135 -v en -p 50 '" + str('hi') + "'") 
     def welcome(self):
 	hour = datetime.now().hour
 
         if(hour < 12):
-           self.mic.say("Good morning, how can I help?")
+           self.speak("Good morning, how can I help?")
 
         if(hour < 16 & hour > 12):
-           self.mic.say("Good afternoon, how can I help?")
+           self.speak("Good afternoon, how can I help?")
 
         if (hour >= 16):
            self.speak("Good evening, how can I help?")
@@ -77,8 +81,8 @@ class VoiceAssistant:
         """
         if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
             print()
-
-        print(event)
+	if event.type == EventType.ON_RESPONDING_STARTED or EventType.ON_RESPONDING_FINISHED:
+	    print(event.type)	
         if (event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED and
                 event.args):
             c = event.args['text']
@@ -86,10 +90,10 @@ class VoiceAssistant:
 
 	if (event.type == EventType.ON_RENDER_RESPONSE and event.args):
 	    resp = event.args['text']
-	    try:
-		self.speak(resp)
-	    except:
-		self.speak('Sorry, there was an error')
+	    #try:
+		#self.speak(resp)
+	    #except:
+		#self.speak('Sorry, there was an error')
 	           
         if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
                 event.args and not event.args['with_follow_on_turn']):
@@ -125,6 +129,7 @@ class VoiceAssistant:
                             help='path to store and read OAuth2 credentials')
         parser.add_argument('-v', '--version', action='version',
                             version='%(prog)s ' + Assistant.__version_str__())
+	parser.add_argument('-x','--abcd')
 
         args = parser.parse_args()
         with open(args.credentials, 'r') as f:
